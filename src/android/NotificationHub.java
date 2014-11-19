@@ -3,7 +3,6 @@ package msopentech.azure;
 import java.util.Set;
 
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -38,8 +37,6 @@ public static final String LOG_TAG = "luca_log";
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
         _callbackContext = callbackContext;
-        Log.d(LOG_TAG, "new callback:"+ action);
-        Log.d(LOG_TAG, "parameters"+ args.toString());
         try {
 
             if (action.equals("registerApplication")) {
@@ -69,13 +66,10 @@ public static final String LOG_TAG = "luca_log";
      */
     @SuppressWarnings("unchecked")
     private void registerApplication(final String hubName, final String connectionString, final String senderId) {
-    Log.d(LOG_TAG, "registerApplication, HN: "+hubName+",CS: "+connectionString+", SID:"+senderId);
 
         try {
                 //NotificationsManager.handleNotifications(this, senderId, MyNotificationHandler.class);
-            Log.d(LOG_TAG, "GoogleCloudMessagingn");
             final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(cordova.getActivity());
-            Log.d(LOG_TAG, "windowsazure");
             final com.microsoft.windowsazure.messaging.NotificationHub hub =
                     new com.microsoft.windowsazure.messaging.NotificationHub(hubName, connectionString, cordova.getActivity());
 
@@ -92,7 +86,6 @@ public static final String LOG_TAG = "luca_log";
                       registrationResult.put("notificationHubPath", registrationInfo.getNotificationHubPath());
                       registrationResult.put("event", "registerApplication");
                       
-                      Log.d(LOG_TAG, "registrationResult"+ registrationResult.toString());
                       PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, registrationResult);
                       // keepKallback is used to continue using the same callback to notify about push notifications received
                       pluginResult.setKeepCallback(true);
@@ -100,14 +93,12 @@ public static final String LOG_TAG = "luca_log";
                       NotificationHub.getCallbackContext().sendPluginResult(pluginResult);
 
                    } catch (Exception e) {
-                           Log.e(LOG_TAG, "doInBackground: "+ e.getMessage());
                        NotificationHub.getCallbackContext().error(e.getMessage());
                    }
                    return null;
                }
              }.execute(null, null, null);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "error"+ e.getMessage());
             NotificationHub.getCallbackContext().error(e.getMessage());
         }
     }
@@ -116,7 +107,6 @@ public static final String LOG_TAG = "luca_log";
      * Unregisters the device for native notifications.
      */
     private void unregisterApplication(final String hubName, final String connectionString) {
-        Log.d(LOG_TAG, "unregisterApplication");
         try {
             final com.microsoft.windowsazure.messaging.NotificationHub hub =
                     new com.microsoft.windowsazure.messaging.NotificationHub(hubName, connectionString, cordova.getActivity());
@@ -157,7 +147,6 @@ public static final String LOG_TAG = "luca_log";
         public void onReceive(Context context, Intent intent) {
             
             
-            Log.w(LOG_TAG, "onReceive");
             JSONObject json = new JSONObject();
             String msg = new String(); 
             try {
@@ -166,7 +155,6 @@ public static final String LOG_TAG = "luca_log";
                 for (String key : keys) {
                     json.put(key, intent.getExtras().get(key));
                 }
-                Log.w(LOG_TAG, "data"+ json.toString());
                 msg = json.getString("message");
 
             } catch (JSONException e) {
@@ -180,26 +168,11 @@ public static final String LOG_TAG = "luca_log";
                 sendNotification(context, msg);
                 return;
             }else{
-                Log.w(LOG_TAG, "data"+ json.toString());
                 PluginResult result = new PluginResult(PluginResult.Status.OK, json);
                 result.setKeepCallback(true);
                 NotificationHub.getCallbackContext().sendPluginResult(result);
             
             }
-//            JSONObject json = new JSONObject();
-//             try {
-// 
-//                 Set<String> keys = intent.getExtras().keySet();
-//                 for (String key : keys) {
-//                     json.put(key, intent.getExtras().get(key));
-//                 }
-//                 Log.w(LOG_TAG, "data"+ json.toString());
-//                 PluginResult result = new PluginResult(PluginResult.Status.OK, json);
-//                 result.setKeepCallback(true);
-//                 NotificationHub.getCallbackContext().sendPluginResult(result);
-//             } catch (JSONException e) {
-//                 e.printStackTrace();
-//             }
         }
 
     }
