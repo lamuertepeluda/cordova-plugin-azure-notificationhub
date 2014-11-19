@@ -70,7 +70,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
         </config-file>
 
         <source-file src="src/android/NotificationHub.java" target-dir="src/msopentech/azure" />
-
+        
+        <lib-file src="${env.ANDROID_SDK}/extras/android/support/v4/android-support-v4.jar" />
         <lib-file src="src/android/google-play-services.jar" />
         <lib-file src="src/android/notification-hubs-0.1.jar" />
     </platform>
