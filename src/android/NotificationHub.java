@@ -19,11 +19,10 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 
-import com.coolappz.FloodNotification.MyNotificationHandler;
-import com.coolappz.FloodNotification.R;
+
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.microsoft.windowsazure.messaging.*;
-import com.microsoft.windowsazure.notifications.NotificationsManager;
+//import com.microsoft.windowsazure.notifications.NotificationsManager;
 
 /**
  * Apache Cordova plugin for Windows Azure Notification Hub
