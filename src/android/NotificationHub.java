@@ -143,7 +143,7 @@ public static final String LOG_TAG = "luca_log";
                  Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                  NotificationCompat.Builder mBuilder =
                   new NotificationCompat.Builder(context)
-                  .setSmallIcon(R.drawable.icon)
+                  .setSmallIcon(android.R.drawable.sym_contact_card) // todo get app icon
                   .setContentTitle("Floodis Notification")
 //                .setStyle(new NotificationCompat.BigTextStyle()
 //                           .bigText())
@@ -155,31 +155,11 @@ public static final String LOG_TAG = "luca_log";
         
         @Override
         public void onReceive(Context context, Intent intent) {
-                Log.w(LOG_TAG, "onReceive");
-            JSONObject jdebug = new JSONObject();
-            String msg = new String(); 
-            try {
-
-                Set<String> keys = intent.getExtras().keySet();
-                for (String key : keys) {
-                    jdebug.put(key, intent.getExtras().get(key));
-                }
-                Log.w(LOG_TAG, "data"+ jdebug.toString());
-                msg = jdebug.getString("message");
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
             
-            sendNotification(context, msg);
-
-                
-
-
-            if (NotificationHub.getCallbackContext() == null){
-                return;
-            }
+            
+            Log.w(LOG_TAG, "onReceive");
             JSONObject json = new JSONObject();
+            String msg = new String(); 
             try {
 
                 Set<String> keys = intent.getExtras().keySet();
@@ -187,12 +167,39 @@ public static final String LOG_TAG = "luca_log";
                     json.put(key, intent.getExtras().get(key));
                 }
                 Log.w(LOG_TAG, "data"+ json.toString());
+                msg = json.getString("message");
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }       
+
+                
+
+
+            if (NotificationHub.getCallbackContext() == null){
+                sendNotification(context, msg);
+                return;
+            }else{
+                Log.w(LOG_TAG, "data"+ json.toString());
                 PluginResult result = new PluginResult(PluginResult.Status.OK, json);
                 result.setKeepCallback(true);
                 NotificationHub.getCallbackContext().sendPluginResult(result);
-            } catch (JSONException e) {
-                e.printStackTrace();
+            
             }
+//            JSONObject json = new JSONObject();
+//             try {
+// 
+//                 Set<String> keys = intent.getExtras().keySet();
+//                 for (String key : keys) {
+//                     json.put(key, intent.getExtras().get(key));
+//                 }
+//                 Log.w(LOG_TAG, "data"+ json.toString());
+//                 PluginResult result = new PluginResult(PluginResult.Status.OK, json);
+//                 result.setKeepCallback(true);
+//                 NotificationHub.getCallbackContext().sendPluginResult(result);
+//             } catch (JSONException e) {
+//                 e.printStackTrace();
+//             }
         }
 
     }
