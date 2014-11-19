@@ -131,10 +131,15 @@ public static final String LOG_TAG = "luca_log";
                                  context.getSystemService(Context.NOTIFICATION_SERVICE);
 
                  Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                 
+                 String uri = "@drawable/icon";
+                 int imageResource = context.getResources().getIdentifier(uri, null, context.getPackageName());
+                 String appName =context.getApplicationInfo().loadLabel(context.getPackageManager()).toString();
+                 
                  NotificationCompat.Builder mBuilder =
                   new NotificationCompat.Builder(context)
-                  .setSmallIcon(android.R.drawable.sym_contact_card) // todo get app icon
-                  .setContentTitle("Floodis Notification")
+                  .setSmallIcon(imageResource) // todo get app icon
+                  .setContentTitle(appName)
 //                .setStyle(new NotificationCompat.BigTextStyle()
 //                           .bigText())
                   .setContentText(msg)
