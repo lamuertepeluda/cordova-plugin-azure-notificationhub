@@ -17,6 +17,7 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.app.PendingIntent;
 
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -130,6 +131,9 @@ public static final String LOG_TAG = "luca_log";
                  mNotificationManager = (NotificationManager)
                                  context.getSystemService(Context.NOTIFICATION_SERVICE);
 
+		 PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
+                                  new Intent(context, it.ismb.FloodisApp.FloodisApp.class), 0);
+
                  Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                  
                  String uri = "@drawable/icon";
@@ -144,6 +148,10 @@ public static final String LOG_TAG = "luca_log";
 //                           .bigText())
                   .setContentText(msg)
                   .setSound(alarmSound);
+
+		  mBuilder.setAutoCancel(true);
+                  mBuilder.setContentIntent(contentIntent);
+
              mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
                 
         }
