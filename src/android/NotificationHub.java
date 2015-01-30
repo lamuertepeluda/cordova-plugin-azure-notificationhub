@@ -19,17 +19,15 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.app.PendingIntent;
 
-
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.microsoft.windowsazure.messaging.*;
-//import com.microsoft.windowsazure.notifications.NotificationsManager;
+
 
 /**
  * Apache Cordova plugin for Windows Azure Notification Hub
  */
 public class NotificationHub extends CordovaPlugin {
 
-public static final String LOG_TAG = "luca_log";
+public static final String LOG_TAG = "plugin_log";
     /**
      * The callback context from which we were invoked.
      */
@@ -69,22 +67,15 @@ public static final String LOG_TAG = "luca_log";
     private void registerApplication(final String hubName, final String connectionString, final String senderId) {
 
         try {
-                //NotificationsManager.handleNotifications(this, senderId, MyNotificationHandler.class);
             final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(cordova.getActivity());
-            final com.microsoft.windowsazure.messaging.NotificationHub hub =
-                    new com.microsoft.windowsazure.messaging.NotificationHub(hubName, connectionString, cordova.getActivity());
-
-            new AsyncTask() {
+           
+		   new AsyncTask() {
                 @Override
                 protected Object doInBackground(Object... params) {
                    try {
-                      String gcmId = gcm.register(senderId);
-                      NativeRegistration registrationInfo = hub.register(gcmId);
-
-                      JSONObject registrationResult = new JSONObject();
-                      registrationResult.put("registrationId", registrationInfo.getRegistrationId());
-                      registrationResult.put("channelUri", registrationInfo.getGCMRegistrationId());
-                      registrationResult.put("notificationHubPath", registrationInfo.getNotificationHubPath());
+                      String gcmId = gcm.register(senderId);                      
+					  JSONObject registrationResult = new JSONObject();					  
+					  registrationResult.put("registrationId", gcmId);
                       registrationResult.put("event", "registerApplication");
                       
                       PluginResult pluginResult = new PluginResult(PluginResult.Status.OK, registrationResult);
@@ -108,10 +99,7 @@ public static final String LOG_TAG = "luca_log";
      * Unregisters the device for native notifications.
      */
     private void unregisterApplication(final String hubName, final String connectionString) {
-        try {
-            final com.microsoft.windowsazure.messaging.NotificationHub hub =
-                    new com.microsoft.windowsazure.messaging.NotificationHub(hubName, connectionString, cordova.getActivity());
-            hub.unregister();
+        try { 
             NotificationHub.getCallbackContext().success();
         } catch (Exception e) {
             NotificationHub.getCallbackContext().error(e.getMessage());
@@ -131,8 +119,7 @@ public static final String LOG_TAG = "luca_log";
                  mNotificationManager = (NotificationManager)
                                  context.getSystemService(Context.NOTIFICATION_SERVICE);
 
-		 PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
-                                  new Intent(context, it.ismb.FloodisApp.FloodisApp.class), 0);
+		 PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, it.ismb.Floodis.FloodisApp.class), 0);
 
                  Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                  

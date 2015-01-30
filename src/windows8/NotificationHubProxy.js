@@ -20,51 +20,59 @@
 */
 module.exports = {
     registerApplication: function (success, fail, args) {
-        try {
+	
+	        try {
             var notificationHubPath = args[0];
             var connectionString = args[1];
             var pushNotificationCallback = window[args[2]];
             var pushNotificationHandler = function (e) {
-                var notification = null;
+                var notificationTypeName = "";
+                var notificationPayload;
+                var msg = {};
+
                 try {
                     var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
                     switch (e.notificationType) {
                         case notificationType.toast:
-                            notification = e.toastNotification.content;
-                            notification.notificationTypeName = "Toast";
+                            notificationPayload = e.toastNotification.content.getXml();
+                            notificationTypeName = "Toast";
                             break;
                         case notificationType.tile:
-                            notification = e.tileNotification.content;
-                            notification.notificationTypeName = "Tile";
+                            notificationPayload = e.tileNotification.content.getXml();
+                            notificationTypeName = "Tile";
                             break;
                         case notificationType.badge:
-                            notification = e.badgeNotification.content;
-                            notification.notificationTypeName = "Badge";
+                            notification = e.badgeNotification.content.getXml();
+                            notificationTypeName = "Badge";
+                            break;
+                        case notificationType.raw:                            
+                            notificationPayload = e.rawNotification.content;
+                            notificationTypeName = "Raw";
                             break;
                     }
-                    pushNotificationCallback(notification);
+                    msg.notificationTypeName = notificationTypeName;
+                    msg.notificationPayload = notificationPayload;
+                    pushNotificationCallback(msg);
                 } catch (ex) {}
-                e.cancel = true;
+                e.cancel = true;            
             }
 
             var notificationChannel = null;
 
             Windows.Networking.PushNotifications.PushNotificationChannelManager.createPushNotificationChannelForApplicationAsync().then(function (channel) {
                 notificationChannel = channel;
-                notificationChannel.addEventListener('pushnotificationreceived', pushNotificationHandler);
-                return (new NotificationHubRuntimeProxy.HubApi()).registerNativeAsync(notificationHubPath, connectionString, channel.uri);
-            }).done(function (result) {
-                var regInfo = {};
-                regInfo.registrationId = result;
-                regInfo.channelUri = notificationChannel.uri;
-                regInfo.notificationHubPath = notificationHubPath;
-
-                success(regInfo);
+                notificationChannel.onpushnotificationreceived = pushNotificationHandler;
+                var msg = {
+                    event: 'registerApplication',
+                    registrationId: notificationChannel.uri
+                }
+                success(msg);
             }, fail);
 
         } catch (ex) {
             fail(ex);
         }
+
     },
 
     unregisterApplication: function (success, fail, args) {
