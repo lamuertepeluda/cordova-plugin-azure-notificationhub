@@ -36,8 +36,6 @@ xmlns:android="http://schemas.android.com/apk/res/android"
 
     <!-- windows8 -->
     <platform name="windows8">
-        <framework src="src/windows8/Microsoft.WindowsAzure.Messaging.Managed.dll" custom="true"/>
-        <framework src="src/windows8/NotificationHubRuntimeProxy.winmd" custom="true"/>
         <js-module src="src/windows8/NotificationHubProxy.js" name="NotificationHubProxy" >
             <clobbers target="" />
         </js-module>
