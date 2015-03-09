@@ -35,8 +35,8 @@ xmlns:android="http://schemas.android.com/apk/res/android"
     </platform>
 
     <!-- windows8 -->
-    <platform name="windows8">
-        <js-module src="src/windows8/NotificationHubProxy.js" name="NotificationHubProxy" >
+    <platform name="windows">
+        <js-module src="src/windows/NotificationHubProxy.js" name="NotificationHubProxy" >
             <clobbers target="" />
         </js-module>
     </platform>
