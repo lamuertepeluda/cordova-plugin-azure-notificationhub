@@ -1,4 +1,4 @@
-/*
+cordova.define("msopentech.azure.NotificationHub.NotificationHub", function (require, exports, module) { /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,90 +17,86 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
-
-var exec = require('cordova/exec');
-var Promise = require('./Promise');
-
-/**
- * Initializes a new instance of the NotificationHub class.
- * http://msdn.microsoft.com/en-us/library/microsoft.windowsazure.messaging.notificationhub.notificationhub.aspx
- *
- * @param {string} notificationHubPath The notification hub path (name).
- * @param {string} connectionString The connection string.
- * @param {string} options Platform specific additional parameters (optional).
  */
-var NotificationHub = function (notificationHubPath, connectionString, options) {
-    if (typeof notificationHubPath == 'undefined') {
-        throw new Error('Please specify notificationHubPath');
-    }
 
-    if (typeof connectionString == 'undefined') {
-        throw new Error('Please specify connectionString');
-    }
-    this.notificationHubPath = notificationHubPath;
-    this.connectionString = connectionString;
-    this.options = options;
+ var exec = require('cordova/exec');
+ var Promise = require('./Promise');
 
-    this.onPushNotificationReceived = null;
-};
+ /**
+  * Initializes a new instance of the NotificationHub class.
+  * http://msdn.microsoft.com/en-us/library/microsoft.windowsazure.messaging.notificationhub.notificationhub.aspx
+  *
+  * @param {string} params Platform specific additional parameters (optional).
+  */
+ var NotificationHub = function (params) {
+  //if (typeof notificationHubPath == 'undefined') {
+  //    throw new Error('Please specify notificationHubPath');
+  //}
 
-/**
- * Asynchronously registers the device for native notifications.
- * http://msdn.microsoft.com/en-us/library/dn339332.aspx
- *
- * @param {Array} tags The tags (not supported currently).
- */
-NotificationHub.prototype.registerApplicationAsync = function (tags) {
-    globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
-    // global handler that will be called every time new notification is received
-    window[globalNotificationHandlerName] = function (msg) {
-        // if handler attached
-        if (this.onPushNotificationReceived != null) {
-            this.onPushNotificationReceived(msg)
-        }
-    }.bind(this);
-    
-    var deferral = new Promise.Deferral(),
+  //if (typeof connectionString == 'undefined') {
+  //   throw new Error('Please specify connectionString');
+  //}
+  //this.notificationHubPath = notificationHubPath;
+  //this.connectionString = connectionString;
+  this.platformSpecificParams = params || null;
 
+  this.onPushNotificationReceived = null;
+ };
+
+ /**
+  * Asynchronously registers the device for native notifications.
+  * http://msdn.microsoft.com/en-us/library/dn339332.aspx
+  *
+  * @param {Array} tags The tags (not supported currently).
+  */
+ NotificationHub.prototype.registerApplicationAsync = function (tags) {
+  globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
+  // global handler that will be called every time new notification is received
+  window[globalNotificationHandlerName] = function (msg) {
+   // if handler attached
+   if (this.onPushNotificationReceived !== null) {
+    this.onPushNotificationReceived(msg);
+   }
+  }.bind(this);
+
+  var deferral = new Promise.Deferral(),
     successCallback = function (result) {
-    	// registration completeness callback
-    	if (result && result.event == 'registerApplication') {
-        	delete result.event; // not required
-        	deferral.resolve(result);
-        } else { //push notification
-    		    window[globalNotificationHandlerName](result);
-        }
+     // registration completeness callback
+     if (result && result.event === 'registerApplication') {
+      delete result.event; // not required
+      deferral.resolve(result);
+     } else { //push notification
+      window[globalNotificationHandlerName](result);
+     }
     },
-
     errorCallback = function (err) {
-        deferral.reject(err);
+     deferral.reject(err);
     };
 
-    exec(successCallback, errorCallback, 'NotificationHub', 'registerApplication', [this.notificationHubPath, this.connectionString, globalNotificationHandlerName, tags, this.options]);
+  exec(successCallback, errorCallback, 'NotificationHub', 'registerApplication', [globalNotificationHandlerName, tags, this.platformSpecificParams]);
 
-    return deferral.promise;
-}
+  return deferral.promise;
+ };
 
-/**
- * Asynchronously unregisters the native registration on the application or secondary tiles.
- * http://msdn.microsoft.com/en-us/library/microsoft.windowsazure.messaging.notificationhub.unregisternativeasync.aspx
- */
-NotificationHub.prototype.unregisterApplicationAsync = function ()
-{
-    var deferral = new Promise.Deferral(),
+ /**
+  * Asynchronously unregisters the native registration on the application or secondary tiles.
+  * http://msdn.microsoft.com/en-us/library/microsoft.windowsazure.messaging.notificationhub.unregisternativeasync.aspx
+  */
+ NotificationHub.prototype.unregisterApplicationAsync = function ()
+ {
+  var deferral = new Promise.Deferral(),
+    successCallback = function (result) {
+     deferral.resolve(result);
+    },
+    errorCallback = function (err) {
+     deferral.reject(err);
+    };
 
-        successCallback = function (result) {
-            deferral.resolve(result);
-        },
+  exec(successCallback, errorCallback, 'NotificationHub', 'unregisterApplication', []);
 
-        errorCallback = function (err) {
-            deferral.reject(err);
-        };
+  return deferral.promise;
+ };
 
-    exec(successCallback, errorCallback, 'NotificationHub', 'unregisterApplication', [this.notificationHubPath, this.connectionString]);
+ module.exports = NotificationHub;
 
-    return deferral.promise;
-}
-
-module.exports = NotificationHub;
+});

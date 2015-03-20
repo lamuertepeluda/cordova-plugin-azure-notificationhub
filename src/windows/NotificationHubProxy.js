@@ -1,4 +1,4 @@
-/*
+cordova.define("msopentech.azure.NotificationHub.NotificationHubProxy", function (require, exports, module) { /*
  *
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -17,79 +17,76 @@
  * specific language governing permissions and limitations
  * under the License.
  *
-*/
-module.exports = {
-    registerApplication: function (success, fail, args) {
-	
-	        try {
-            var notificationHubPath = args[0];
-            var connectionString = args[1];
-            var pushNotificationCallback = window[args[2]];
-            var pushNotificationHandler = function (e) {
-                var notificationTypeName = "";
-                var notificationPayload;
-                var msg = {};
+ */
+ module.exports = {
+  registerApplication: function (success, fail) {//, params) {
+   //Params seem not needed on windows...
+   try {
+    var pushNotificationCallback = window.NotificationHub_onNotificationReceivedGlobal;
+    var pushNotificationHandler = function (e) {
+     var notificationTypeName = "";
+     var notificationPayload;
+     var msg = {};
 
-                try {
-                    var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
-                    switch (e.notificationType) {
-                        case notificationType.toast:
-                            notificationPayload = e.toastNotification.content.getXml();
-                            notificationTypeName = "Toast";
-                            break;
-                        case notificationType.tile:
-                            notificationPayload = e.tileNotification.content.getXml();
-                            notificationTypeName = "Tile";
-                            break;
-                        case notificationType.badge:
-                            notification = e.badgeNotification.content.getXml();
-                            notificationTypeName = "Badge";
-                            break;
-                        case notificationType.raw:                            
-                            notificationPayload = e.rawNotification.content;
-                            notificationTypeName = "Raw";
-                            break;
-                    }
-                    msg.notificationTypeName = notificationTypeName;
-                    msg.notificationPayload = notificationPayload;
-                    pushNotificationCallback(msg);
-                } catch (ex) {}
-                e.cancel = true;            
-            }
+     try {
+      var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
+      switch (e.notificationType) {
+       case notificationType.toast:
+        notificationPayload = e.toastNotification.content.getXml();
+        notificationTypeName = "Toast";
+        break;
+       case notificationType.tile:
+        notificationPayload = e.tileNotification.content.getXml();
+        notificationTypeName = "Tile";
+        break;
+       case notificationType.badge:
+        notification = e.badgeNotification.content.getXml();
+        notificationTypeName = "Badge";
+        break;
+       case notificationType.raw:
+        notificationPayload = e.rawNotification.content;
+        notificationTypeName = "Raw";
+        break;
+      }
+      msg.notificationTypeName = notificationTypeName;
+      msg.notificationPayload = notificationPayload;
 
-            var notificationChannel = null;
+      pushNotificationCallback(msg);
+     } catch (ex) {
+      console.error("pushNotificationHandler::Exception caught", ex);
+     }
+     e.cancel = true;
+    };
 
-            Windows.Networking.PushNotifications.PushNotificationChannelManager.createPushNotificationChannelForApplicationAsync().then(function (channel) {
-                notificationChannel = channel;
-                notificationChannel.onpushnotificationreceived = pushNotificationHandler;
-                var msg = {
-                    event: 'registerApplication',
-                    registrationId: notificationChannel.uri
-                }
-                success(msg);
-            }, fail);
+    var notificationChannel = null;
 
-        } catch (ex) {
-            fail(ex);
-        }
+    Windows.Networking.PushNotifications.PushNotificationChannelManager.createPushNotificationChannelForApplicationAsync().then(function (channel) {
+     notificationChannel = channel;
+     notificationChannel.onpushnotificationreceived = pushNotificationHandler;
+     var msg = {
+      event: 'registerApplication',
+      registrationId: notificationChannel.uri
+     };
+     success(msg);
+    }, fail);
 
-    },
+   } catch (ex) {
+    fail(ex);
+   }
 
-    unregisterApplication: function (success, fail, args) {
-        try {
-            var notificationHubPath = args[0];
-            var connectionString = args[1];
-          
-            (new NotificationHubRuntimeProxy.HubApi()).unregisterNativeAsync(notificationHubPath, connectionString);
+  },
+  unregisterApplication: function (success, fail, args) {
+   try {
+    //The following looks unsupported
+    //          (new NotificationHubRuntimeProxy.HubApi()).unregisterNativeAsync(notificationHubPath, connectionString);
+    success();
 
-            success();
+   } catch (ex) {
+    fail(ex);
+   }
+  }
 
-        } catch (ex) {
-            fail(ex);
-        }
-    }
+ };
 
-}
-
-require("cordova/exec/proxy").add("NotificationHub", module.exports);
-//require("cordova/windows8/commandProxy").add("NotificationHub", module.exports);
+ require("cordova/exec/proxy").add("NotificationHub", module.exports);
+});

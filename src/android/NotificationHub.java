@@ -42,17 +42,14 @@ public class NotificationHub extends CordovaPlugin {
   try {
 
    if (action.equals("registerApplication")) {
-    String hubName = args.getString(0);
-    String connectionString = args.getString(1);
-    String senderId = args.getString(4);
-    registerApplication(hubName, connectionString, senderId);
+    String senderId = args.getString(2);
+    registerApplication(
+	senderId);
     return true;
    }
 
    if (action.equals("unregisterApplication")) {
-    String hubName = args.getString(0);
-    String connectionString = args.getString(1);
-    unregisterApplication(hubName, connectionString);
+    unregisterApplication();
     return true;
    }
 
@@ -67,7 +64,8 @@ public class NotificationHub extends CordovaPlugin {
   * Asynchronously registers the device for native notifications.
   */
  @SuppressWarnings("unchecked")
- private void registerApplication(final String hubName, final String connectionString, final String senderId) {
+ private void registerApplication(
+ final String senderId) {
 
   try {
    final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(cordova.getActivity());
@@ -101,7 +99,7 @@ public class NotificationHub extends CordovaPlugin {
  /**
   * Unregisters the device for native notifications.
   */
- private void unregisterApplication(final String hubName, final String connectionString) {
+ private void unregisterApplication(){
   try {
    NotificationHub.getCallbackContext().success();
   } catch (Exception e) {
