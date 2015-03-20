@@ -50,7 +50,7 @@ cordova.define("msopentech.azure.NotificationHub.NotificationHub", function (req
   * @param {Array} tags The tags (not supported currently).
   */
  NotificationHub.prototype.registerApplicationAsync = function (tags) {
-  globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
+  var globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
   // global handler that will be called every time new notification is received
   window[globalNotificationHandlerName] = function (msg) {
    // if handler attached
