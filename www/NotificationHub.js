@@ -52,15 +52,14 @@ var NotificationHub = function (notificationHubPath, connectionString, options) 
  * @param {Array} tags The tags (not supported currently).
  */
 NotificationHub.prototype.registerApplicationAsync = function (tags) {
-    var me = this,
-        globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
+    globalNotificationHandlerName = 'NotificationHub_onNotificationReceivedGlobal';
     // global handler that will be called every time new notification is received
     window[globalNotificationHandlerName] = function (msg) {
         // if handler attached
-        if (me.onPushNotificationReceived != null) {
-            me.onPushNotificationReceived(msg)
+        if (this.onPushNotificationReceived != null) {
+            this.onPushNotificationReceived(msg)
         }
-    };
+    }.bind(this);
     
     var deferral = new Promise.Deferral(),
 
