@@ -36,7 +36,8 @@
                                                  name:@"UIApplicationDidReceiveRemoteNotification" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didRegisterUserNotificationSettings:)
-                                                 name:CDVRemoteNotification object:nil];
+                                                 //name:CDVRemoteNotification object:nil];
+                                                 name:@"UIApplicationDidRegisterUserNotificationSettings" object: nil];
 }
 
 - (void)registerApplication:(CDVInvokedUrlCommand*)command
@@ -84,28 +85,19 @@
     
     NSData *deviceToken  = notif.object;
     
-    SBNotificationHub* hub = [[SBNotificationHub alloc] initWithConnectionString:
-                              self.connectionString notificationHubPath:self.notificationHubPath];
-
-    [hub registerNativeWithDeviceToken:deviceToken tags:nil completion:^(NSError* error) {
-        if (error != nil) {
-            [self failWithError:error];
-            return;
-        }
-        
-        // http://stackoverflow.com/a/1587441
-        NSString *channelUri = [[deviceToken description] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
-        channelUri = [channelUri stringByReplacingOccurrencesOfString:@" " withString:@""];
-        
-        // create callback argument
-        NSMutableDictionary* registration = [NSMutableDictionary dictionaryWithCapacity:4];
-        [registration setObject:@"registerApplication" forKey:@"event"];
-        [registration setObject:channelUri forKey:@"registrationId"]; // TODO: find the way to report registrationId
-        [registration setObject:channelUri forKey:@"channelUri"];
-        [registration setObject:self.notificationHubPath forKey:@"notificationHubPath"];
-        
-        [self reportResult: registration keepCallback:[NSNumber numberWithInteger: TRUE]];
-    }];
+    NSString *channelUri = [[deviceToken description] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+    channelUri = [channelUri stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
+    // create callback argument
+    NSMutableDictionary* registration = [NSMutableDictionary dictionaryWithCapacity:4];
+    [registration setObject:@"registerApplication" forKey:@"event"];
+    [registration setObject:channelUri forKey:@"registrationId"]; // TODO: find the way to report registrationId
+    [registration setObject:channelUri forKey:@"channelUri"];
+    [registration setObject:self.notificationHubPath forKey:@"notificationHubPath"];
+    
+    [self reportResult: registration keepCallback:[NSNumber numberWithInteger: TRUE]];
+    
+    return;    
 }
 
 - (void) didRegisterForRemoteNotificationsWithDeviceTokenCordova:(NSNotification *)notif
@@ -164,6 +156,10 @@
     pluginResult.keepCallback = keepCalback;
     
     [self success:pluginResult callbackId:self.callbackId];
+}
+
+- (void)didRegisterUserNotificationSettings:(NSNotification *)notif {
+    [[UIApplication sharedApplication] registerForRemoteNotifications];
 }
 
 -(void)failWithError:(NSError *)error
