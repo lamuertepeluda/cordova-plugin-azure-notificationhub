@@ -82,6 +82,11 @@ xmlns:android="http://schemas.android.com/apk/res/android"
         </config-file>
         <header-file src="src/ios/NotificationHub.h" />
         <source-file src="src/ios/NotificationHub.m" />
-        <framework src="src/ios/WindowsAzureMessaging.framework" custom="true" />
+
+        <header-file src="src/ios/AppDelegate+AzureNotifications.h" />
+        <source-file src="src/ios/AppDelegate+AzureNotifications.m" />
+
+        <!-- <framework src="src/ios/WindowsAzureMessaging.framework" custom="true" /> -->
+        <source-file src="src/ios/libWindowsAzureMessaging.a" framework="true" />
     </platform>
 </plugin>
