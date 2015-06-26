@@ -18,6 +18,15 @@
  * under the License.
  *
  */
+function parseToastContent(toastContent) {
+ var payload = "";
+ var textNodes = toastContent.getElementsByTagName('text');
+ for (var i = 0; i < textNodes.length; i++) {
+  payload = textNodes[i].innerText + "\n";
+ }
+ return payload;
+}
+
 module.exports = {
  registerApplication: function (success, fail) {//, params) {
   //Params seem not needed on windows...
@@ -32,15 +41,15 @@ module.exports = {
      var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
      switch (e.notificationType) {
       case notificationType.toast:
-       notificationPayload = e.toastNotification.content.getXml();
+       notificationPayload = parseToastContent(e.toastNotification.content);//e.toastNotification.content.getXml();
        notificationTypeName = "Toast";
        break;
       case notificationType.tile:
-       notificationPayload = e.tileNotification.content.getXml();
+       notificationPayload = e.tileNotification.content.getXml();//TODO parser
        notificationTypeName = "Tile";
        break;
       case notificationType.badge:
-       notification = e.badgeNotification.content.getXml();
+       notification = e.badgeNotification.content.getXml();//TODO parser
        notificationTypeName = "Badge";
        break;
       case notificationType.raw:
