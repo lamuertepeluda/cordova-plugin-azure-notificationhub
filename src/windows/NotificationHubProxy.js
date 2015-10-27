@@ -19,81 +19,82 @@
  *
  */
 function parseToastContent(toastContent) {
- var payload = "";
- var textNodes = toastContent.getElementsByTagName('text');
- for (var i = 0; i < textNodes.length; i++) {
-  payload = textNodes[i].innerText + "\n";
- }
- return payload;
+    var payload = "";
+    var textNodes = toastContent.getElementsByTagName('text');
+    for (var i = 0; i < textNodes.length; i++) {
+        payload = textNodes[i].innerText + "\n";
+    }
+    return payload;
 }
 
+var notificationChannel = null;
+
 module.exports = {
- registerApplication: function (success, fail) {//, params) {
-  //Params seem not needed on windows...
-  try {
-   var pushNotificationCallback = window.NotificationHub_onNotificationReceivedGlobal;
-   var pushNotificationHandler = function (e) {
-    var notificationTypeName = "";
-    var notificationPayload;
-    var msg = {};
+    registerApplication: function(success, fail) { //, params) {
+        //Params seem not needed on windows...
+        try {
+            var pushNotificationCallback = window.NotificationHub_onNotificationReceivedGlobal;
+            var pushNotificationHandler = function(e) {
+                var notificationTypeName = "";
+                var notificationPayload;
+                var msg = {};
 
-    try {
-     var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
-     switch (e.notificationType) {
-      case notificationType.toast:
-       notificationPayload = parseToastContent(e.toastNotification.content);//e.toastNotification.content.getXml();
-       notificationTypeName = "Toast";
-       break;
-      case notificationType.tile:
-       notificationPayload = e.tileNotification.content.getXml();//TODO parser
-       notificationTypeName = "Tile";
-       break;
-      case notificationType.badge:
-       notification = e.badgeNotification.content.getXml();//TODO parser
-       notificationTypeName = "Badge";
-       break;
-      case notificationType.raw:
-       notificationPayload = e.rawNotification.content;
-       notificationTypeName = "Raw";
-       break;
-     }
-     msg.notificationTypeName = notificationTypeName;
-     msg.notificationPayload = notificationPayload;
+                try {
+                    var notificationType = Windows.Networking.PushNotifications.PushNotificationType;
+                    switch (e.notificationType) {
+                        case notificationType.toast:
+                            notificationPayload = parseToastContent(e.toastNotification.content); //e.toastNotification.content.getXml();
+                            notificationTypeName = "Toast";
+                            break;
+                        case notificationType.tile:
+                            notificationPayload = e.tileNotification.content.getXml(); //TODO parser
+                            notificationTypeName = "Tile";
+                            break;
+                        case notificationType.badge:
+                            notification = e.badgeNotification.content.getXml(); //TODO parser
+                            notificationTypeName = "Badge";
+                            break;
+                        case notificationType.raw:
+                            notificationPayload = e.rawNotification.content;
+                            notificationTypeName = "Raw";
+                            break;
+                    }
+                    msg.notificationTypeName = notificationTypeName;
+                    msg.notificationPayload = notificationPayload;
 
-     pushNotificationCallback(msg);
-    } catch (ex) {
-     console.error("pushNotificationHandler::Exception caught", ex);
+                    pushNotificationCallback(msg);
+                } catch (ex) {
+                    console.error("pushNotificationHandler::Exception caught", ex);
+                }
+                e.cancel = true;
+            };
+
+
+            Windows.Networking.PushNotifications.PushNotificationChannelManager.createPushNotificationChannelForApplicationAsync().then(function(channel) {
+                notificationChannel = channel;
+                notificationChannel.onpushnotificationreceived = pushNotificationHandler;
+                var msg = {
+                    event: 'registerApplication',
+                    registrationId: notificationChannel.uri
+                };
+                success(msg);
+            }, fail);
+
+        } catch (ex) {
+            fail(ex);
+        }
+
+    },
+    unregisterApplication: function(success, fail, args) {
+        try {
+            //Invalidate the PN Channel
+            notificationChannel.close();
+            success();
+
+        } catch (ex) {
+            fail(ex);
+        }
     }
-    e.cancel = true;
-   };
-
-   var notificationChannel = null;
-
-   Windows.Networking.PushNotifications.PushNotificationChannelManager.createPushNotificationChannelForApplicationAsync().then(function (channel) {
-    notificationChannel = channel;
-    notificationChannel.onpushnotificationreceived = pushNotificationHandler;
-    var msg = {
-     event: 'registerApplication',
-     registrationId: notificationChannel.uri
-    };
-    success(msg);
-   }, fail);
-
-  } catch (ex) {
-   fail(ex);
-  }
-
- },
- unregisterApplication: function (success, fail, args) {
-  try {
-   //The following looks unsupported
-   //          (new NotificationHubRuntimeProxy.HubApi()).unregisterNativeAsync(notificationHubPath, connectionString);
-   success();
-
-  } catch (ex) {
-   fail(ex);
-  }
- }
 
 };
 
